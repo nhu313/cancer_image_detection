@@ -4,10 +4,11 @@ import numpy as np
 from collections import defaultdict
 from tqdm import tqdm
 import random
+import pandas as pd
 
 
 class ImageLoad:
-    def __init__(self, dataset_path: str, resize_to=(64, 64)):
+    def __init__(self, dataset_path: str, save_new_dataset: bool = 0, resize_to=(64, 64)):
         """
         Initializes the ImageLoad class.
 
@@ -15,15 +16,19 @@ class ImageLoad:
             dataset_path (str): Path to the dataset directory containing images.
             resize_to (tuple): Dimensions to resize images to (default: (64, 64)).
         """
-        self.resize_to = resize_to
+        self.save_new_dataset = save_new_dataset
+        self.size = resize_to
         self.dataset_path = dataset_path
-        self.image_tensors = defaultdict(list)
+        self.image_np_arrays = list() # populated in main_loop
         self.output_dir = 'data/output'
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Load image paths
         self.image_paths = self._load_image_paths()
+        # dataframe is populated in main_loop
+        self.df = pd.DataFrame()
         self.main_loop()
+    
 
     def main_loop(self) -> dict:
         """
@@ -42,21 +47,29 @@ class ImageLoad:
                 self._rotate_90_clockwise(image),
                 self._rotate_90_counter_clockwise(image)
             ]
+            self.image_np_arrays.append((category, processed_images))
 
-            for idx_i, img in enumerate(processed_images):
-                id_ = f"{idx + 1}_{idx_i}"
-                self.save_to_folders(fname, img, id_, category)
+            if self.save_new_dataset == 1:
+                for idx_i, img in enumerate(processed_images):
+                    id_ = f"{idx + 1}_{idx_i}"
+                    self.save_to_folders(fname, img, id_, category)
         
-       # all_together_arrays.append(processed_images)
+
+        # Parse each img into df as cols: (Image, Numpy Array)
+        self.df = pd.DataFrame(
+            [(cat, image) for cat, imgs in self.image_np_arrays for image in imgs],
+                columns=['Label', 'Image']
+        )
         print('Batch process completed.')
         #return all_together_arrays
 
-    def _open_img(self, image_path: str) -> np.ndarray:
+
+    def _open_img(self, image_path: str, add_noise:bool= True) -> np.ndarray:
         """Opens and transforms the image into NumPy array form."""
         img = cv2.imread(image_path)
-        img_resized = cv2.resize(img, self.resize_to)  # Resize the image
+        img_resized = cv2.resize(img, self.size)  # Resize the image
         # TODO add noise to each image
-        if random.randint(0, 1) > 0.7:
+        if add_noise and random.randint(0, 1) > 0.7:
             return self._add_gaussian_noise(img_resized)
         return img_resized
 
@@ -101,7 +114,7 @@ class ImageLoad:
     def _add_gaussian_blurr(self, image: np.ndarray) -> np.ndarray:
         """Applies Gaussian blur to the image."""
         return cv2.GaussianBlur(image, (7, 7), 0)
-
+    
     def _load_image_paths(self) -> list[tuple[str, str, str]]:
         """
         Recursively loads image file paths from the dataset directory.
@@ -122,3 +135,26 @@ class ImageLoad:
                             (fname, os.path.join(category_path, fname), category))
 
         return image_paths
+    
+   
+        """
+        Loads an image from the given file path and converts it to a tensor.
+
+        Args:
+            file_path (str): Path to the image file.
+
+        Returns:
+            torch.Tensor: The transformed image tensor of shape (3, 64, 64).
+        """
+        # Load the image
+        image = Image.open(file_path).convert('RGB')  # Convert to RGB if needed
+
+        # Define a transformation to resize and convert to tensor
+        transform = transforms.Compose([
+            transforms.Resize((64, 64)),  # Resize to 64x64
+            transforms.ToTensor(),  # Convert to tensor
+        ])
+
+        # Apply the transformation
+        image_tensor = transform(image)
+        return image_tensor

@@ -19,7 +19,7 @@ The final output is a Pandas DataFrame where:
 
 ![df_example](imgs/dataframe.png)
 
-## Wide Convolutional Neural Network
+# Wide Convolutional Neural Network
 
 ### Feature Extraction Mathmatically Explained
 

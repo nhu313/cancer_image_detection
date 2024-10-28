@@ -1,0 +1,17 @@
+# Image file types to ignore
+*.tiff
+*.tif
+*.jpg
+*.jpeg
+
+# Specific directories to ignore
+Blood_Cancer_TIFFS/
+health_ai/
+stages/
+testing_data/
+__pycache__/
+health_info/
+cancer_app/
+
+# System files to ignore
+.DS_Store

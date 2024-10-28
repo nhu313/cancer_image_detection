@@ -1,0 +1,11 @@
+numpy<2
+pandas
+matplotlib
+opencv-python
+torch
+torchvision
+pillow
+tqdm
+requests
+Flask == 2.0.1
+Werkzeug==2.2.2

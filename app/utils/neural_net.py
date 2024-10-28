@@ -121,7 +121,6 @@ class Convoultion_NN(ImageLoad):
         # Permute from Numpy Array (H, W, C) to Tensor(C, H, W)
         img_tensor = img_tensor.permute(2, 0, 1)  
         del image 
-        del img_tensor
 
         return img_tensor
 
@@ -171,7 +170,8 @@ class Convoultion_NN(ImageLoad):
                 self.optimizer.step()  # Update weights
 
                 epoch_loss += loss.item()
-                
+                del img_tensor
+
             
             print(f"Epoch [{epoch + 1}/{epochs}], Loss: {epoch_loss / len(self.df):.4f}")
 

@@ -73,7 +73,7 @@ class ImageLoad:
             return self._add_gaussian_noise(img_resized)
         return img_resized
 
-    def _add_gaussian_noise(self, image: np.ndarray, mean: float = 0, sigma: float = 3) -> np.ndarray:
+    def _add_gaussian_noise(self, image: np.ndarray, mean: float = 0, sigma: float = 25) -> np.ndarray:
         """Adds Gaussian noise to the image."""
 
         noise = np.random.normal(mean, sigma, image.shape).astype(np.uint8)

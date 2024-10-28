@@ -5,6 +5,7 @@ opencv-python
 torch
 torchvision
 pillow
+scikit-learn
 tqdm
 requests
 Flask == 2.0.1

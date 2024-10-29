@@ -1,20 +1,16 @@
 /* styles.css */
 
-/* Global Styles */
 body {
-    background-color: #0f0f0f; /* Dark background for a cyberpunk vibe */
+    background-color: #0f0f0f; /* Dark background */
     color: #00ffcc; /* Neon teal text */
     font-family: 'Orbitron', sans-serif; /* Futuristic font */
-    line-height: 1.6; /* Improve readability */
 }
 
-/* Headings */
 h1, h2, h3, h4 {
     color: #ff00ff; /* Neon pink for headings */
     text-shadow: 0 0 10px rgba(255, 0, 255, 0.8); /* Glowing effect */
 }
 
-/* Links */
 a {
     color: #00ffcc; /* Neon teal for links */
     text-decoration: none;
@@ -25,42 +21,3 @@ a:hover {
     text-shadow: 0 0 15px rgba(255, 0, 255, 1); /* Glowing effect on hover */
 }
 
-/* Images */
-img {
-    border: 2px solid #ff00ff; /* Neon pink border for images */
-    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5); /* Glowing effect */
-    margin: 1rem 0; /* Margin for spacing */
-}
-
-/* Lists */
-ul {
-    list-style-type: none; /* Remove default bullet points */
-    padding-left: 0; /* Remove default padding */
-}
-
-ul li {
-    position: relative; /* Position for custom bullet */
-    padding-left: 1.5rem; /* Space for custom bullet */
-}
-
-ul li:before {
-    content: "🔹"; /* Custom bullet point */
-    position: absolute; 
-    left: 0; 
-}
-
-/* Blockquotes */
-blockquote {
-    border-left: 4px solid #ff00ff; /* Neon pink left border */
-    padding-left: 1rem; /* Padding for readability */
-    color: #cccccc; /* Light grey text for quotes */
-    font-style: italic; /* Italic for quotes */
-}
-
-/* Code Blocks */
-pre {
-    background-color: rgba(255, 0, 255, 0.1); /* Light pink background for code blocks */
-    border-radius: 5px; /* Rounded corners */
-    padding: 1rem; /* Padding */
-    overflow: auto; /* Enable scrolling */
-}

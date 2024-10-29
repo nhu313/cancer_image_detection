@@ -9,6 +9,7 @@ theme: minima
 # Minima theme settings
 minima:
   skin: dark # Options: "classic", "solarized", or "dark"
+  custom_css: styles.css
   social_links:
     github: "https://github.com/LilaShiba/"
     linkedin: "https://www.linkedin.com/in/shibawizard/"

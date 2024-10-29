@@ -47,18 +47,18 @@ class Convoultion_NN(ImageLoad):
         if architecture == "wide":
             # Wide architecture
             layers.extend([
-                # One Convolution
+        ################### One Convolution   ##################
                 nn.Conv2d(
                     self.input_channels, 
                     128, # output
                     kernel_size=3, 
                     stride=1, 
                     padding=1),
-                
+                # Average Pooling
                 nn.BatchNorm2d(128),
-                
+                # Activation Function
                 nn.ReLU(),
-                
+                # Grab most important features
                 nn.MaxPool2d(kernel_size=2, stride=2),
                 
                 
@@ -67,6 +67,7 @@ class Convoultion_NN(ImageLoad):
                 
                 nn.Conv2d(128, # input
                           256, # output
+                          # sliding-window settings
                           kernel_size=3, 
                           stride=1, 
                           padding=1),
@@ -74,7 +75,8 @@ class Convoultion_NN(ImageLoad):
                 nn.ReLU(),
                 nn.MaxPool2d(kernel_size=2, stride=2),
 
-                # Train
+                # Linear transformation on input
+                # y= xW^T +b
                 nn.Flatten(),
                 nn.Linear(256 * 16 * 16, 512),  # Adjust based on input size
                 nn.ReLU(),

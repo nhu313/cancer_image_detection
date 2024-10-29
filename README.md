@@ -21,6 +21,9 @@ The final output is a Pandas DataFrame where:
 
 # Wide Convolutional Neural Network
 
+![model_summary](imgs/model_summary.png)
+
+
 ### Feature Extraction Mathmatically Explained
 
 The convolution technique we are using may be expressed as

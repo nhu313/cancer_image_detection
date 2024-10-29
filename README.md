@@ -1,4 +1,3 @@
-## Wide Convolutional Neural Network
 
 ![model_summary](imgs/model_summary.png)
 
@@ -41,6 +40,5 @@ capturing features via pixel intensity
 ![max_pooling](imgs/max_pooling.png)
 
 
-For both formulas, the sliding window (also known as the kernel) moves across the feature map. In average pooling, the average value within this window is extracted by normalizing pixel intensity via 1/|R| * ∑(window). In max pooling, the most prominent feature within the window is extracted. 
-
+For both formulas, the sliding window (also known as the kernel) moves across the feature map. In average pooling, the average value within this window is extracted by normalizing pixel intensity. In max pooling, the most prominent feature within the window is extracted. 
 So, average pooling can be thought of as a smoothing function, while max pooling focuses on extracting the most important feature as defined by pixel intensity.

@@ -1,9 +1,9 @@
-# Wide Convolutional Neural Network
+## Wide Convolutional Neural Network
 
 ![model_summary](imgs/model_summary.png)
 
 
-## 📸 Image Preprocessing for Augmented Dataset
+### 📸 Image Preprocessing for Augmented Dataset
 
 This class preprocesses images by applying a range of common augmentations in image recognition. The goal is to make your model more robust and capable of recognizing features in diverse scenarios by creating more diverse data. Currently, we use the following techniques:
 

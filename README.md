@@ -1,7 +1,9 @@
-# 🏥 HCI: Health Informatics
+# Wide Convolutional Neural Network
+
+![model_summary](imgs/model_summary.png)
 
 
-### 📸 Image Preprocessing for Augmented Dataset
+## 📸 Image Preprocessing for Augmented Dataset
 
 This class preprocesses images by applying a range of common augmentations in image recognition. The goal is to make your model more robust and capable of recognizing features in diverse scenarios by creating more diverse data. Currently, we use the following techniques:
 
@@ -19,13 +21,9 @@ The final output is a Pandas DataFrame where:
 
 ![df_example](imgs/dataframe.png)
 
-# Wide Convolutional Neural Network
-
-![model_summary](imgs/model_summary.png)
-
+## Deep-Wide CNN
 
 ### Feature Extraction Mathmatically Explained
-
 The convolution technique we are using may be expressed as
 
 ![convo_example](imgs/convolution.png)

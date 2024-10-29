@@ -34,4 +34,8 @@ This creates a basic feature map, which is kept to its original size, which intr
 
 ### Average Pooling
 
+![avg_pooling](imgs/pooling.png)
+
 ### Max Pooling
+
+![max_pooling](imgs/max_pooling.png)

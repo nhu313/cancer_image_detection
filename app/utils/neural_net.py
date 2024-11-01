@@ -49,7 +49,7 @@ class Convoultion_NN(ImageLoad):
         image_tensors = []
         label_tensors = torch.tensor(self.df['EncodedLabel'].values, dtype=torch.long).to(self.device)
 
-        for _, row in tqdm(self.df.iterrows(), len(self.df)):
+        for _, row in tqdm(self.df.iterrows(), total=len(self.df)):
             img_array = row['Image'].copy()  
             img_tensor = torch.tensor(img_array, dtype=torch.float32) / 255.0  # Normalize to [0, 1]
             img_tensor = F.normalize(img_tensor)  # Further normalization (optional)

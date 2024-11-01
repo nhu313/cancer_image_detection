@@ -47,11 +47,13 @@ class ImageLoad:
 
                 processed_images = [
                     image,
-                    self._add_gaussian_blurr(image),
+                    #self._add_gaussian_blurr(image),
                     self._rotate_180(image),
                     self._rotate_90_clockwise(image),
                     self._rotate_90_counter_clockwise(image)
                 ]
+
+                processed_images = [x for x in processed_images if x is not None]
                 self.image_np_arrays.append((category, processed_images))
 
                 if self.save_new_dataset == 1:
@@ -87,9 +89,9 @@ class ImageLoad:
 
     def _add_gaussian_noise(self, image: np.ndarray, mean: float = 0, sigma: float = 25) -> np.ndarray:
         """Adds Gaussian noise to the image."""
-
+       
         noise = np.random.normal(mean, sigma, image.shape).astype(np.uint8)
-        # Add the noise to the image
+            # Add the noise to the image
         return cv2.add(image, noise)
 
     def save_to_folders(self, fname: str, image: np.ndarray, idx: str, category: str):
@@ -113,15 +115,21 @@ class ImageLoad:
 
     def _rotate_90_counter_clockwise(self, image: np.ndarray) -> np.ndarray:
         """Rotates the image 90 degrees counterclockwise."""
-        return np.rot90(image, k=1)
+        if random.randint(0, 1) > 0.7:
+            return np.rot90(image, k=1)
+        return None
 
     def _rotate_90_clockwise(self, image: np.ndarray) -> np.ndarray:
         """Rotates the image 90 degrees clockwise."""
-        return np.rot90(image, k=-1)
+        if random.randint(0, 1) > 0.7:
+            return np.rot90(image, k=-1)
+        return None
 
     def _rotate_180(self, image: np.ndarray) -> np.ndarray:
         """Rotates the image 180 degrees."""
-        return cv2.flip(image, -1)
+        if random.randint(0, 1) > 0.7:
+            return cv2.flip(image, -1)
+        return None
 
     def _add_gaussian_blurr(self, image: np.ndarray) -> np.ndarray:
         """Applies Gaussian blur to the image."""

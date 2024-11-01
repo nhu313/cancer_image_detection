@@ -23,9 +23,7 @@ class Convoultion_NN(ImageLoad):
         # for speed/memory | changes epoch iterations as batch_size must complete dataset cycle
         self.batch_size = batch_size 
         self.architecture = architecture
-        # encode string labels to ints
-        
-
+        # encode string labels to ints happens in train method
         self.model = self.build_model(architecture='wide')
         # Define the loss function
         self.loss_function = nn.CrossEntropyLoss()
@@ -34,7 +32,6 @@ class Convoultion_NN(ImageLoad):
         # Move model to the appropriate device
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
-
     def build_model(self, architecture):
         """
         Builds the CNN model based on the specified architecture.
@@ -97,94 +94,56 @@ class Convoultion_NN(ImageLoad):
         """
         return self.model(x)
     
-    def image_to_tensor(self, file_path: str = False, numpy_array:str = None):
-        """
-        Loads an image & converts to tensor.
-
-        Args:
-            file_path (str): Path to the image file.
-
-        Returns:
-            torch.Tensor: The transformed image tensor of shape (3, 64, 64) to match model
-        """
-        
-        # Load & Resize the image
-        if file_path != False:
-            image = self._open_img(file_path, add_noise=False)
-            # Apply the transformation
-        else: 
-            image = numpy_array
-        
-        image = image.copy()
-        img_tensor = torch.tensor(image, dtype=torch.float32)  # Convert to float tensor
-        # Normalize 
-        img_tensor /= 255.0 
-       
-        # Permute from Numpy Array (H, W, C) to Tensor(C, H, W)
-        img_tensor = img_tensor.permute(2, 0, 1)  
-        del image 
-
-        return img_tensor
-
     def train(self, epochs: int):
+        self.model.train()
         
-        """
-        Train the CNN model.
-
-        Args:
-            epochs (int): Number of training epochs.
-        """
-
-        self.model.train()  # Set to train mode
-
-        # Initialize LabelEncoder
-        label_encoder = LabelEncoder()
-        self.df['Label'] = label_encoder.fit_transform(self.df['Label'])
+        # Encode labels and save encoder for later use
+        self.label_encoder = LabelEncoder()
+        self.df['EncodedLabel'] = self.label_encoder.fit_transform(self.df['Label'])
 
         for epoch in range(epochs):
             epoch_loss = 0
 
             for _, row in tqdm(self.df.iterrows(), total=self.df.shape[0]):
-                label = row.iloc[0]  
-                image_array = row.iloc[1]  
+                encoded_label = row['EncodedLabel']  
+                image_array = row.iloc[1]  # Assuming the image data is in the second column
                 
-                # Convert the numpy array to a tensor
-                img_tensor = self.image_to_tensor(numpy_array=image_array)
+                img_tensor = self.image_to_tensor(numpy_array=image_array).unsqueeze(0)
+                label_tensor = torch.tensor([encoded_label], dtype=torch.long, device=self.device)
 
-                # Add batch dimension
-                img_tensor = img_tensor.unsqueeze(0)  # Shape becomes (1, C, H, W)
-
-                # Create label tensor
-                label_tensor = torch.tensor([label], dtype=torch.long)  # Create a single-element tensor
-
-                # Forward pass
                 output = self.model(img_tensor)
-
-                # Check the shapes for debugging
-               # print(f"Output shape: {output.shape}, Label shape: {label_tensor.shape}")
-
-                # Compute loss
                 loss = self.loss_function(output, label_tensor)
-        
-                # Backward pass and optimization
-                self.optimizer.zero_grad()  # Clear gradients
-                loss.backward()  # Backpropagation
-                self.optimizer.step()  # Update weights
+
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
 
                 epoch_loss += loss.item()
                 del img_tensor
 
-            
             print(f"Epoch [{epoch + 1}/{epochs}], Loss: {epoch_loss / len(self.df):.4f}")
 
+    def process_image(self, file_path: str):
+        self.model.eval()
+        
+        with torch.no_grad():
+            img_tensor = self.image_to_tensor(file_path).unsqueeze(0)
+            output = self.model(img_tensor)
+            predicted_label = torch.argmax(output, dim=1).item()
+            predicted_label = self.label_encoder.inverse_transform([predicted_label])[0]  # Decode back to original label
 
-    def process_image(self, file):
-        '''
-        # TODO create neural net and process image lol
-        '''
+        return predicted_label
+    def image_to_tensor(self, file_path=None, numpy_array=None):
+        if file_path:
+            image = self._open_img(file_path, add_noise=False)
+        else:
+            image = numpy_array
 
-        return "200"
-
+        image = image.copy()
+        img_tensor = torch.tensor(image, dtype=torch.float32) / 255.0
+        img_tensor = img_tensor.permute(2, 0, 1)  # (H, W, C) -> (C, H, W)
+        
+        return img_tensor.to(self.device)  # Return tensor on correct device
 
 if __name__ == "__main__":
     folder_path = "/Users/kjams/Desktop/research/health_informatics/app/data/testing_data"

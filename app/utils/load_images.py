@@ -32,42 +32,54 @@ class ImageLoad:
 
     def main_loop(self) -> dict:
         """
-        Processes all images and stores the results.
+        Processes all images and stores the results in a DataFrame.
+
+        Returns:
+            dict: A dictionary with processed images categorized by their labels.
         """
-        #all_together_arrays = []
         print('Start batch process...')
+        
+        processed_images_list = []  # To store the processed images for DataFrame
 
         for idx, (fname, img_path, category) in enumerate(tqdm(self.image_paths, desc="Processing images")):
-            image = self._open_img(img_path)
+            try:
+                image = self._open_img(img_path)
 
-            processed_images = [
-                image,
-                self._add_gaussian_blurr(image),
-                self._rotate_180(image),
-                self._rotate_90_clockwise(image),
-                self._rotate_90_counter_clockwise(image)
-            ]
-            self.image_np_arrays.append((category, processed_images))
+                processed_images = [
+                    image,
+                    self._add_gaussian_blurr(image),
+                    self._rotate_180(image),
+                    self._rotate_90_clockwise(image),
+                    self._rotate_90_counter_clockwise(image)
+                ]
+                self.image_np_arrays.append((category, processed_images))
 
-            if self.save_new_dataset == 1:
-                for idx_i, img in enumerate(processed_images):
-                    id_ = f"{idx + 1}_{idx_i}"
-                    self.save_to_folders(fname, img, id_, category)
-        
+                if self.save_new_dataset == 1:
+                    for idx_i, img in enumerate(processed_images):
+                        id_ = f"{idx + 1}_{idx_i}"
+                        self.save_to_folders(fname, img, id_, category)
 
-        # Parse each img into df as cols: (Image, Numpy Array)
-        self.df = pd.DataFrame(
-            [(cat, image) for cat, imgs in self.image_np_arrays for image in imgs],
-                columns=['Label', 'Image']
-        )
+                processed_images_list.extend((category, img) for img in processed_images)
+
+            except Exception as e:
+                print(f"Error processing {img_path}: {e}")
+
+        # Parse each image into DataFrame as columns: (Label, Numpy Array)
+        self.df = pd.DataFrame(processed_images_list, columns=['Label', 'Image'])
         print('Batch process completed.')
-        #return all_together_arrays
+
 
 
     def _open_img(self, image_path: str, add_noise:bool= True) -> np.ndarray:
         """Opens and transforms the image into NumPy array form."""
         img = cv2.imread(image_path)
+        height, width = img.shape[:2]
+        new_height = height - (height // 8) # crop out stamp on btm right
         img_resized = cv2.resize(img, self.size)  # Resize the image
+        
+        img_resized = img_resized[0:new_height, 0:width]
+
+
         # TODO add noise to each image
         if add_noise and random.randint(0, 1) > 0.7:
             return self._add_gaussian_noise(img_resized)

@@ -21,7 +21,7 @@ COPY . /app
 EXPOSE 5001
 
 # Set environment variables (optional)
-ENV FLASK_APP=main.py
+ENV FLASK_APP=app/main.py
 ENV FLASK_ENV=development
 
 # Command to run the Flask app

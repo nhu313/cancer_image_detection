@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from utils.neural_net import process_image
+# from utils.neural_net import process_image
 
 app = Flask(__name__)
 
@@ -15,8 +15,9 @@ def upload_image():
         return jsonify({'error': 'No file uploaded'}), 400
 
     # Process the image using the neural network and return the result
-    category = process_image(file)
-    return jsonify({'category': category})
+    # category = process_image(file)
+    # return jsonify({'category': category})
+    return jsonify({'message': 'processed'})
 
 
 @app.route('/')

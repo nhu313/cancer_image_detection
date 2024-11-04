@@ -15,17 +15,17 @@ class CNN(ImageLoad):
         if tensors and len(tensors) == 2:
             
             self.load_model(model_path=model_path)
-            self.image_tensors, self.label_tensors = self.load_tensors(tensors)
+            self.label_tensors = self.load_tensors(tensors)
             print('CNN INIT SUCCESSFUL: 200')
         else:
             raise ValueError("Tensors must be provided as a list of two file paths.")
         
     def load_tensors(self, tensors):
         # Load saved tensors
-        image_tensors = torch.load(tensors[0],weights_only=True).to(self.device)
+        #image_tensors = torch.load(tensors[0],weights_only=True).to(self.device)
         label_tensors = torch.load(tensors[1],weights_only=True).to(self.device)
         print("Tensors loaded from disk.")
-        return image_tensors, label_tensors
+        return label_tensors # , image_tensors
 
     def build_model(self, architecture: str) -> nn.Sequential:
         """

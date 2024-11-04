@@ -33,4 +33,5 @@ EXPOSE 5001
 ENV FLASK_APP=main.py
 
 # Use a production WSGI server (e.g., Gunicorn)
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5001", "main:app"]
+CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:5001", "main:app"]
+

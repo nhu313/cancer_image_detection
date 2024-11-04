@@ -13,6 +13,7 @@ class CNN(ImageLoad):
         
         
         if tensors and len(tensors) == 2:
+            
             self.load_model(model_path=model_path)
             self.image_tensors, self.label_tensors = self.load_tensors(tensors)
             print('CNN INIT SUCCESSFUL: 200')
@@ -21,8 +22,8 @@ class CNN(ImageLoad):
         
     def load_tensors(self, tensors):
         # Load saved tensors
-        image_tensors = torch.load(tensors[0]).to(self.device)
-        label_tensors = torch.load(tensors[1]).to(self.device)
+        image_tensors = torch.load(tensors[0],weights_only=True).to(self.device)
+        label_tensors = torch.load(tensors[1],weights_only=True).to(self.device)
         print("Tensors loaded from disk.")
         return image_tensors, label_tensors
 
@@ -65,7 +66,7 @@ class CNN(ImageLoad):
     
     def load_model(self, model_path):
         # Load model parameters
-        self.model.load_state_dict(torch.load(model_path, map_location=self.device))
+        self.model.load_state_dict(torch.load(model_path, weights_only=True, map_location=self.device))
         self.model.eval()
         print("Model loaded from disk.")
         

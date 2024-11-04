@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
-from load_images import ImageLoad  # Assuming ImageLoad is saved in load_images.py
+from app.utils.load_images import ImageLoad  # Assuming ImageLoad is saved in load_images.py
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -18,6 +18,7 @@ class Convoultion_NN(ImageLoad):
         # Inherit from ImageLoad
         super().__init__(dataset_path)
         # Pre-Process Images
+        self.image_paths = self._load_image_paths()
         self.main_loop()
         # Input shape defaults to (input_channels, height, width)
         self.input = (input_channels, self.size[0], self.size[1])

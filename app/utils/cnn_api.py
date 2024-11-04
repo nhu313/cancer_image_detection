@@ -1,13 +1,16 @@
 import torch
 import torch.nn as nn
-from load_images import ImageLoad
+from app.utils.load_images import ImageLoad
 import torch.nn.functional as F
 
 class CNN(ImageLoad):
     def __init__(self, architecture: str = "wide", tensors: list = None, model_path: str = "cnn_model.pth"):
+        self.input_channels = 3
+        self.number_of_labels = 4
+        self.size = (64,64)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = self.build_model(architecture).to(self.device)
-        self.load_model(model_path)
+        
         
         if tensors and len(tensors) == 2:
             self.load_model(model_path=model_path)
@@ -65,8 +68,9 @@ class CNN(ImageLoad):
         self.model.load_state_dict(torch.load(model_path, map_location=self.device))
         self.model.eval()
         print("Model loaded from disk.")
+        
 
-    def predict_image_tensor(self, path_to_image) -> int:
+    def predict_image(self, path_to_image) -> int:
         # Predict class for a single image tensor
         self.model.eval()
         img = self._open_img(image_path=path_to_image, add_noise=False)
@@ -80,12 +84,13 @@ class CNN(ImageLoad):
             predicted_label_index = torch.argmax(output, dim=1).item()
             return predicted_label_index
 
-# # Example usage
-# if __name__ == "__main__":
-#     tensor_paths = ["image_tensors.pt", "label_tensors.pt"]
-#     cnn = cnn_api(tensors=tensor_paths, model_path="cnn_model.pth")
+# Example usage
+if __name__ == "__main__":
+    tensor_paths = ["app/utils/data/image_tensors.pt", "app/utils/data/label_tensors.pt"]
+    cnn = CNN(tensors=tensor_paths, model_path='app/utils/data/model_11_4.pth')
 
-#     # Predict on a sample tensor from loaded image tensors
-#     sample_image_tensor = cnn.image_tensors[0]  # Example: using the first image tensor
-#     prediction = cnn.predict_image_tensor(sample_image_tensor)
-#     print("Predicted label index:", prediction)
+    # Predict on a sample tensor from loaded image tensors
+
+    sample_image = "/Users/kjams/Desktop/research/health_informatics/app/data/testing_data/early/WBC-Malignant-Early-010.jpg"
+    prediction = cnn.predict_image(sample_image)
+    print("Predicted label index:", prediction)

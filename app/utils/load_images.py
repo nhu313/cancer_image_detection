@@ -25,7 +25,6 @@ class ImageLoad:
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Load image paths
-        self.image_paths = self._load_image_paths()
         # dataframe is populated in main_loop
         self.df = pd.DataFrame()
         
@@ -86,7 +85,7 @@ class ImageLoad:
 
 
         # TODO add noise to each image
-        if add_noise and random.randint(0, 1) > 0.8 and cat == False:
+        if add_noise and random.randint(0, 1) > 0.9 and cat == False:
             return self._add_gaussian_noise(img_resized)
         return img_resized
 

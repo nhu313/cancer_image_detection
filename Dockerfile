@@ -15,14 +15,14 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the entire project into the container
-COPY . /app
+COPY . .
 
 # Expose port 5001 for Flask
 EXPOSE 5001
 
-# Set environment variables (optional)
+# Set environment variables
 ENV FLASK_APP=main.py
 ENV FLASK_ENV=development
 
 # Command to run the Flask app
-CMD ["flask", "run", "--host=0.0.0.0"]
+CMD ["flask", "run", "--host=0.0.0.0", "--port=5001"]

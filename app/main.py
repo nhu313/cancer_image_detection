@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from utils.neural_net import process_image
+from utils.cnn_api import CNN
 
 app = Flask(__name__)
 
@@ -10,12 +10,12 @@ def upload_image():
     processed in utils/neural_net.py
     '''
     file = request.files.get('file')
+    category = cnn.predict_image_tensor(file)
 
     if not file:
         return jsonify({'error': 'No file uploaded'}), 400
-
-    # Process the image using the neural network and return the result
-    category = process_image(file)
+    
+   
     return jsonify({'category': category})
 
 
@@ -28,4 +28,9 @@ def home():
 
 
 if __name__ == '__main__':
+    # TODO: Where to load model/tensors?
+    cnn = CNN(architecture='wide',
+              tensors=["utils/image_tensors.pt", "utils/label_tensors.pt"],
+              model_path=['utils/model_11_4.pth'])
+
     app.run(debug=True, host='0.0.0.0', port=5001)

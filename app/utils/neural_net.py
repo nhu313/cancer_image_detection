@@ -17,6 +17,8 @@ class Convoultion_NN(ImageLoad):
                  input_channels: int = 3, architecture: str = "wide"):
         # Inherit from ImageLoad
         super().__init__(dataset_path)
+        # Pre-Process Images
+        self.main_loop()
         # Input shape defaults to (input_channels, height, width)
         self.input = (input_channels, self.size[0], self.size[1])
         self.number_of_labels = self.df['Label'].nunique()
@@ -36,7 +38,7 @@ class Convoultion_NN(ImageLoad):
 
         # Convert images and labels to tensors
         self.image_tensors, self.label_tensors = self.create_image_tensors()
-
+        self.save_tensors()
         # Define model and parameters
         self.model = self.build_model(architecture=self.architecture).to(self.device)
         self.loss_function = nn.CrossEntropyLoss()
@@ -57,7 +59,7 @@ class Convoultion_NN(ImageLoad):
             # TODO: Change for deployment
             img_array = row['Image'].copy()  
             img_tensor = torch.tensor(img_array, dtype=torch.float32) / 255.0  # Normalize to [0, 1]
-            #img_tensor = F.normalize(img_tensor) 
+            img_tensor = F.normalize(img_tensor) 
             img_tensor = img_tensor.permute(2, 0, 1)  # Convert (H, W, C) to (C, H, W)
             image_tensors.append(img_tensor)
 
@@ -188,6 +190,12 @@ class Convoultion_NN(ImageLoad):
 
         img_tensor = img_tensor.permute(2, 0, 1)  # (H, W, C) -> (C, H, W)
         return img_tensor.to(self.device)  # Return tensor on correct device
+
+    def save_tensors(self):
+        # Save tensors to file
+        torch.save(self.image_tensors, "image_tensors.pt")
+        torch.save(self.label_tensors, "label_tensors.pt")
+        print("Tensors saved to disk.")
 
 if __name__ == "__main__":
     folder_path = "/Users/kjams/Desktop/research/health_informatics/app/data/testing_data"

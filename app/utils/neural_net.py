@@ -21,11 +21,14 @@ class Convoultion_NN(ImageLoad):
         self.input = (input_channels, self.size[0], self.size[1])
         self.number_of_labels = self.df['Label'].nunique()
         self.learning_rate = learning_rate
-        self.input_channels = input_channels  # (RGB for us, change if B/W)
-        self.batch_size = batch_size  # For speed/memory; changes epoch iterations as batch_size must complete dataset cycle
+        self.input_channels = input_channels  
+        # For speed/memory; changes epoch iterations as batch_size must complete dataset cycle
+        self.batch_size = batch_size 
         self.architecture = architecture
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
+        # Begin AI Pre-processing
+
         # Encode labels
         self.label_encoder = LabelEncoder()
         self.df['EncodedLabel'] = self.label_encoder.fit_transform(self.df['Label'])
@@ -49,10 +52,12 @@ class Convoultion_NN(ImageLoad):
         image_tensors = []
         label_tensors = torch.tensor(self.df['EncodedLabel'].values, dtype=torch.long).to(self.device)
 
-        for _, row in tqdm(self.df.iterrows(), len(self.df)):
+        for _, row in tqdm(self.df.iterrows(), total=len(self.df)):
+            # Fixes copying error on local machine
+            # TODO: Change for deployment
             img_array = row['Image'].copy()  
             img_tensor = torch.tensor(img_array, dtype=torch.float32) / 255.0  # Normalize to [0, 1]
-            img_tensor = F.normalize(img_tensor)  # Further normalization (optional)
+            #img_tensor = F.normalize(img_tensor) 
             img_tensor = img_tensor.permute(2, 0, 1)  # Convert (H, W, C) to (C, H, W)
             image_tensors.append(img_tensor)
 

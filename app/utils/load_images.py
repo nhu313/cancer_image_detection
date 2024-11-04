@@ -21,6 +21,7 @@ class ImageLoad:
         self.dataset_path = dataset_path
         self.image_np_arrays = list() # populated in main_loop
         self.output_dir = 'data/output'
+        self.percent = 0.7
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Load image paths
@@ -43,15 +44,19 @@ class ImageLoad:
 
         for idx, (fname, img_path, category) in enumerate(tqdm(self.image_paths, desc="Processing images")):
             try:
-                image = self._open_img(img_path)
+                cat = True if category == 'Benign' else False
 
+                image = self._open_img(img_path, cat=cat)
                 processed_images = [
                     image,
-                    self._add_gaussian_blurr(image),
-                    self._rotate_180(image),
-                    self._rotate_90_clockwise(image),
-                    self._rotate_90_counter_clockwise(image)
+                    self._add_gaussian_blurr(image,cat),
+                    self._flip_hort(image, cat),
+                    self._flip_vert(image, cat),
+                    self._rotate_90_clockwise(image, cat),
+                    self._rotate_90_counter_clockwise(image, cat)
                 ]
+
+                processed_images = [x for x in processed_images if x is not None]
                 self.image_np_arrays.append((category, processed_images))
 
                 if self.save_new_dataset == 1:
@@ -70,7 +75,7 @@ class ImageLoad:
 
 
 
-    def _open_img(self, image_path: str, add_noise:bool= True) -> np.ndarray:
+    def _open_img(self, image_path: str, add_noise:bool= True, cat=False) -> np.ndarray:
         """Opens and transforms the image into NumPy array form."""
         img = cv2.imread(image_path)
         height, width = img.shape[:2]
@@ -81,15 +86,15 @@ class ImageLoad:
 
 
         # TODO add noise to each image
-        if add_noise and random.randint(0, 1) > 0.7:
+        if add_noise and random.randint(0, 1) > 0.7 and cat == False:
             return self._add_gaussian_noise(img_resized)
         return img_resized
 
-    def _add_gaussian_noise(self, image: np.ndarray, mean: float = 0, sigma: float = 25) -> np.ndarray:
+    def _add_gaussian_noise(self, image: np.ndarray, mean: float = 0, sigma: float = 10) -> np.ndarray:
         """Adds Gaussian noise to the image."""
-
+       
         noise = np.random.normal(mean, sigma, image.shape).astype(np.uint8)
-        # Add the noise to the image
+            # Add the noise to the image
         return cv2.add(image, noise)
 
     def save_to_folders(self, fname: str, image: np.ndarray, idx: str, category: str):
@@ -111,21 +116,35 @@ class ImageLoad:
         if not success:
             raise IOError(f"Failed to save the image at {file_path}")
 
-    def _rotate_90_counter_clockwise(self, image: np.ndarray) -> np.ndarray:
+    def _rotate_90_counter_clockwise(self, image: np.ndarray, cat:bool = False) -> np.ndarray:
         """Rotates the image 90 degrees counterclockwise."""
-        return np.rot90(image, k=1)
+        if random.randint(0, 1) > self.percent or cat == True:
+            return np.rot90(image, k=1)
+        return None
 
-    def _rotate_90_clockwise(self, image: np.ndarray) -> np.ndarray:
+    def _rotate_90_clockwise(self, image: np.ndarray, cat:bool = False) -> np.ndarray:
         """Rotates the image 90 degrees clockwise."""
-        return np.rot90(image, k=-1)
+        if random.randint(0, 1) > self.percent or cat == True:
+            return np.rot90(image, k=-1)
+        return None
 
-    def _rotate_180(self, image: np.ndarray) -> np.ndarray:
-        """Rotates the image 180 degrees."""
-        return cv2.flip(image, -1)
+    def _flip_hort(self, image: np.ndarray, cat:bool = False) -> np.ndarray:
+        """flip over horzontal axis."""
+        if random.randint(0, 1) > self.percent or cat == True:
+            return cv2.flip(image, -1)
+        return None
+    
+    def _flip_vert(self, image: np.ndarray, cat:bool = False) -> np.ndarray:
+        """flip over vertical axis."""
+        if random.randint(0, 1) > self.percent or cat == True:
+            return cv2.flip(image, 1)
+        return None
 
-    def _add_gaussian_blurr(self, image: np.ndarray) -> np.ndarray:
+    def _add_gaussian_blurr(self, image: np.ndarray, cat:bool = False) -> np.ndarray:
         """Applies Gaussian blur to the image."""
-        return cv2.GaussianBlur(image, (7, 7), 0)
+        if random.randint(0, 1) > self.percent or cat == False:
+            return cv2.GaussianBlur(image, (3, 3), 0)
+        return None
     
     def _load_image_paths(self) -> list[tuple[str, str, str]]:
         """

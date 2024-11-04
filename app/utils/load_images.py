@@ -49,11 +49,18 @@ class ImageLoad:
                 image = self._open_img(img_path, cat=cat)
                 processed_images = [
                     image,
+<<<<<<< HEAD
                     self._add_gaussian_blurr(image,cat),
                     self._flip_hort(image, cat),
                     self._flip_vert(image, cat),
                     self._rotate_90_clockwise(image, cat),
                     self._rotate_90_counter_clockwise(image, cat)
+=======
+                    #self._add_gaussian_blurr(image),
+                    self._rotate_180(image),
+                    self._rotate_90_clockwise(image),
+                    self._rotate_90_counter_clockwise(image)
+>>>>>>> 8d41a47bd855c08c5cb7d953f59632b1fbd7b6ae
                 ]
 
                 processed_images = [x for x in processed_images if x is not None]
@@ -118,12 +125,17 @@ class ImageLoad:
 
     def _rotate_90_counter_clockwise(self, image: np.ndarray, cat:bool = False) -> np.ndarray:
         """Rotates the image 90 degrees counterclockwise."""
+<<<<<<< HEAD
         if random.randint(0, 1) > self.percent or cat == True:
+=======
+        if random.randint(0, 1) > 0.7:
+>>>>>>> 8d41a47bd855c08c5cb7d953f59632b1fbd7b6ae
             return np.rot90(image, k=1)
         return None
 
     def _rotate_90_clockwise(self, image: np.ndarray, cat:bool = False) -> np.ndarray:
         """Rotates the image 90 degrees clockwise."""
+<<<<<<< HEAD
         if random.randint(0, 1) > self.percent or cat == True:
             return np.rot90(image, k=-1)
         return None
@@ -139,6 +151,17 @@ class ImageLoad:
         if random.randint(0, 1) > self.percent or cat == True:
             return cv2.flip(image, 1)
         return None
+=======
+        if random.randint(0, 1) > 0.7:
+            return np.rot90(image, k=-1)
+        return None
+
+    def _rotate_180(self, image: np.ndarray) -> np.ndarray:
+        """Rotates the image 180 degrees."""
+        if random.randint(0, 1) > 0.7:
+            return cv2.flip(image, -1)
+        return None
+>>>>>>> 8d41a47bd855c08c5cb7d953f59632b1fbd7b6ae
 
     def _add_gaussian_blurr(self, image: np.ndarray, cat:bool = False) -> np.ndarray:
         """Applies Gaussian blur to the image."""

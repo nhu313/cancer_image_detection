@@ -21,7 +21,7 @@ class ImageLoad:
         self.dataset_path = dataset_path
         self.image_np_arrays = list() # populated in main_loop
         self.output_dir = 'data/output'
-        self.percent = 0.7
+        self.percent = 0.75
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Load image paths
@@ -37,7 +37,7 @@ class ImageLoad:
         Returns:
             dict: A dictionary with processed images categorized by their labels.
         """
-        print('Start batch process...')
+        print('Start image preprocessing...')
         
         processed_images_list = []  # To store the processed images for DataFrame
 
@@ -70,7 +70,7 @@ class ImageLoad:
 
         # Parse each image into DataFrame as columns: (Label, Numpy Array)
         self.df = pd.DataFrame(processed_images_list, columns=['Label', 'Image'])
-        print('Batch process completed.')
+        print('💖Preprocessing completed.💖')
 
 
 
@@ -84,9 +84,9 @@ class ImageLoad:
         img_resized = img_resized[0:new_height, 0:width]
 
 
-        # TODO add noise to each image
-        if add_noise and random.randint(0, 1) > 0.9 and cat == False:
-            return self._add_gaussian_noise(img_resized)
+        # # TODO add noise to each image
+        # if add_noise and random.randint(0, 1) > 0.9 and cat == False:
+        #     return self._add_gaussian_noise(img_resized)
         return img_resized
 
     def _add_gaussian_noise(self, image: np.ndarray, mean: float = 0, sigma: float = 25) -> np.ndarray:

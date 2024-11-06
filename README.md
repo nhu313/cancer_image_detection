@@ -1,4 +1,9 @@
 
+# Wide Convolutional Neural Network
+To train, locater the jupyter notebook in app/utils/train_model
+
+
+The purpose of this repository is to share the tools needed to quickly create a CNN for cancer image recognition. To free up doctors time, and to enable quick test results for which currently can take months.
 ![model_summary](imgs/model_summary.png)
 
 

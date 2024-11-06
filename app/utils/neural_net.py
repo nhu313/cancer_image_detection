@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
-from app.utils.load_images import ImageLoad  # Assuming ImageLoad is saved in load_images.py
+from load_images import ImageLoad  # Assuming ImageLoad is saved in load_images.py
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import DataLoader, TensorDataset
 
@@ -54,7 +54,7 @@ class Convoultion_NN(ImageLoad):
         """
         image_tensors = []
         label_tensors = torch.tensor(self.df['EncodedLabel'].values, dtype=torch.long).to(self.device)
-
+        print('🦊 creating image and label tensors 🦊')
         for _, row in tqdm(self.df.iterrows(), total=len(self.df)):
             # Fixes copying error on local machine
             # TODO: Change for deployment

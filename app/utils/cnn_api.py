@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
-from app.utils.load_images import ImageLoad
+from load_images import ImageLoad
 import torch.nn.functional as F
+from tqdm import tqdm
 
 class CNN(ImageLoad):
     def __init__(self, architecture: str = "wide", tensors: list = None, model_path: str = "cnn_model.pth"):
@@ -15,17 +16,17 @@ class CNN(ImageLoad):
         if tensors and len(tensors) == 2:
             
             self.load_model(model_path=model_path)
-            self.label_tensors = self.load_tensors(tensors)
+            self.image_tensors,self.label_tensors = self.load_tensors(tensors)
             print('CNN INIT SUCCESSFUL: 200')
         else:
             raise ValueError("Tensors must be provided as a list of two file paths.")
         
     def load_tensors(self, tensors):
         # Load saved tensors
-        #image_tensors = torch.load(tensors[0],weights_only=True).to(self.device)
-        label_tensors = torch.load(tensors[1],weights_only=True).to(self.device)
+        self.image_tensors = torch.load(tensors[0],weights_only=True).to(self.device)
+        self.label_tensors = torch.load(tensors[1],weights_only=True).to(self.device)
         print("Tensors loaded from disk.")
-        return label_tensors # , image_tensors
+        return self.image_tensors, self.label_tensors
 
     def build_model(self, architecture: str) -> nn.Sequential:
         """
@@ -38,39 +39,59 @@ class CNN(ImageLoad):
             nn.Sequential: A sequential model based on the desired architecture.
         """
         layers = []
-
-        if architecture == "wide":
-            # Wide architecture
+        if architecture == "deep-wide":
+    # Wide and deep architecture
             layers.extend([
-                # Convolution 1
-                nn.Conv2d(self.input_channels, 128, kernel_size=3, stride=1, padding=1),
-                nn.BatchNorm2d(128),
-                nn.ReLU(),
-                nn.MaxPool2d(kernel_size=2, stride=2),
-                nn.Dropout(0.25),
-                # Convolution 2
-                nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
-                nn.BatchNorm2d(256),
-                nn.ReLU(),
-                nn.MaxPool2d(kernel_size=2, stride=2),
-                nn.Dropout(0.25),
-                # Linear transformation
-                nn.Flatten(),
-                nn.Linear(256 * 16 * 16, 512),  # Adjust based on input size
-                nn.ReLU(),
-                nn.Dropout(0.5),
-                nn.Linear(512, self.number_of_labels)
-            ])
+        # Convolution Block 1
+        nn.Conv2d(self.input_channels, 64, kernel_size=5, stride=1, padding=2),
+        nn.BatchNorm2d(64),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2, stride=2),
+        nn.Dropout(0.3),
+
+        # Convolution Block 2
+        nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+        nn.BatchNorm2d(128),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2, stride=2),
+        nn.Dropout(0.3),
+
+        # Convolution Block 3
+        nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+        nn.BatchNorm2d(256),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2, stride=2),
+        nn.Dropout(0.4),
+
+        # Convolution Block 4
+        nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
+        nn.BatchNorm2d(512),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2, stride=2),
+        nn.Dropout(0.4),
+
+        # Flatten and Fully Connected Layers
+        nn.Flatten(),
+        nn.Linear(512 * 4 * 4, 1024),  # Adjust based on image size
+        nn.ReLU(),
+        nn.Dropout(0.5),
+        nn.Linear(1024, 512),
+        nn.ReLU(),
+        nn.Dropout(0.5),
         
-        return nn.Sequential(*layers)
-    
+        # Final output layer
+        nn.Linear(512, self.number_of_labels),
+        nn.LogSoftmax(dim=1)  # LogSoftmax for multi-class classification
+    ])
+
+        return nn.Sequential(*layers)    
+   
     def load_model(self, model_path):
         # Load model parameters
         self.model.load_state_dict(torch.load(model_path, weights_only=True, map_location=self.device))
         self.model.eval()
         print("Model loaded from disk.")
         
-
     def predict_image(self, path_to_image) -> int:
         # Predict class for a single image tensor
         self.model.eval()
@@ -84,6 +105,38 @@ class CNN(ImageLoad):
             output = self.model(img_tensor.unsqueeze(0))  # Add batch dimension
             predicted_label_index = torch.argmax(output, dim=1).item()
             return predicted_label_index
+
+    def test_model(self, test_image_tensors: torch.Tensor=None, test_label_tensors: torch.Tensor = None) -> float:
+        """
+        Tests the CNN model on a set of test images.
+
+        Args:
+            test_image_tensors (torch.Tensor): Tensors of test images.
+            test_label_tensors (torch.Tensor): Tensors of true labels for the test images.
+
+        Returns:
+            float: Test accuracy as a percentage.
+        """
+        self.model.eval()  # Set the model to evaluation mode
+        correct = 0  # Counter for correct predictions
+        total = len(self.label_tensors) # Total number of test samples
+        print('Total:',total)
+        with torch.no_grad():  # Disable gradient computation for testing
+            for i in tqdm(range(total)):
+                img_tensor = self.image_tensors[i].unsqueeze(0).to(self.device)  # Add batch dimension
+                label = self.label_tensors[i].to(self.device)
+                output = self.model(img_tensor)  # Forward pass
+
+                # Get the predicted label (index with max probability)
+                predicted_label_index = torch.argmax(output, dim=1).item()
+                
+                # Check if the prediction matches the true label
+                if predicted_label_index == label.item():
+                    correct += 1
+        
+            accuracy = (correct / total) * 100
+            print(f"Test Accuracy: {accuracy:.2f}%")
+        return accuracy
 
 # Example usage
 if __name__ == "__main__":

@@ -16,3 +16,4 @@ cancer_app/
 # System files to ignore
 *.DS_Store
 *.pth
+*.pt

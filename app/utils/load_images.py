@@ -21,7 +21,7 @@ class ImageLoad:
         self.dataset_path = dataset_path
         self.image_np_arrays = list() # populated in main_loop
         self.output_dir = 'data/output'
-        self.percent = 0.75
+        self.percent = 0.70
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Load image paths
@@ -38,17 +38,19 @@ class ImageLoad:
             dict: A dictionary with processed images categorized by their labels.
         """
         print('Start image preprocessing...')
-        
+    
         processed_images_list = []  # To store the processed images for DataFrame
 
         for idx, (fname, img_path, category) in enumerate(tqdm(self.image_paths, desc="Processing images")):
+        
             try:
-                cat = True if category == 'Benign' else False
+                cat = True #if category == 'Benign' else False
 
                 image = self._open_img(img_path, cat=cat)
                 processed_images = [
                     image,
                     self._add_gaussian_blurr(image,cat),
+                    self._add_gaussian_noise(image, cat),
                     self._flip_hort(image, cat),
                     self._flip_vert(image, cat),
                     self._rotate_90_clockwise(image, cat),
@@ -70,17 +72,27 @@ class ImageLoad:
 
         # Parse each image into DataFrame as columns: (Label, Numpy Array)
         self.df = pd.DataFrame(processed_images_list, columns=['Label', 'Image'])
+        
+        # Find the minimum row count across all categories
+        min_count = self.df['Label'].value_counts().min()
+
+        # Sample each category to have the same number of rows as `min_count`
+        self.df = self.df.groupby('Label').apply(lambda x: x.sample(n=min_count)).reset_index(drop=True)
         print('💖Preprocessing completed.💖')
 
 
 
-    def _open_img(self, image_path: str, add_noise:bool= True, cat=False) -> np.ndarray:
+    def _open_img(self, image_path: str, add_noise:bool= True, cat=False, show:bool=False) -> np.ndarray:
         """Opens and transforms the image into NumPy array form."""
         img = cv2.imread(image_path)
         height, width = img.shape[:2]
         new_height = height - (height // 8) # crop out stamp on btm right
         img_resized = cv2.resize(img, self.size)  # Resize the image
-        
+        if show:
+            cv2.imshow("Resized Image", img_resized)
+            cv2.waitKey(0)  # Wait for a key press to close the window
+            cv2.destroyAllWindows()  # Close the window after key press
+
         img_resized = img_resized[0:new_height, 0:width]
 
 
@@ -89,12 +101,14 @@ class ImageLoad:
         #     return self._add_gaussian_noise(img_resized)
         return img_resized
 
-    def _add_gaussian_noise(self, image: np.ndarray, mean: float = 0, sigma: float = 25) -> np.ndarray:
+    def _add_gaussian_noise(self, image: np.ndarray, cat:bool=True, mean: float = 0, sigma: float = 25) -> np.ndarray:
         """Adds Gaussian noise to the image."""
-       
-        noise = np.random.normal(mean, sigma, image.shape).astype(np.uint8)
+        if random.randint(0, 1) > self.percent or cat == True:
+
+            noise = np.random.normal(mean, sigma, image.shape).astype(np.uint8)
             # Add the noise to the image
-        return cv2.add(image, noise)
+            return cv2.add(image, noise)
+        return None
 
     def save_to_folders(self, fname: str, image: np.ndarray, idx: str, category: str):
         """Saves the processed image to the specified category folder."""

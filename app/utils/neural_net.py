@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 class Convoultion_NN(ImageLoad):
     def __init__(self, dataset_path: str, learning_rate: float = 0.001, batch_size: int = 32, 
-                 input_channels: int = 3, architecture: str = "wide"):
+                 input_channels: int = 3, architecture: str = "deep-wide"):
         # Inherit from ImageLoad
         super().__init__(dataset_path)
         # Pre-Process Images
@@ -80,11 +80,11 @@ class Convoultion_NN(ImageLoad):
         """
         layers = []
 
-        if architecture == "wide":
+        if architecture == "deep-wide":
             # Wide architecture
             layers.extend([
                 # Convolution 1
-                nn.Conv2d(self.input_channels, 128, kernel_size=3, stride=1, padding=1),
+                nn.Conv2d(self.input_channels, 128, kernel_size=5, stride=1, padding=2),
                 nn.BatchNorm2d(128),
                 nn.ReLU(),
                 nn.MaxPool2d(kernel_size=2, stride=2),
@@ -95,9 +95,15 @@ class Convoultion_NN(ImageLoad):
                 nn.ReLU(),
                 nn.MaxPool2d(kernel_size=2, stride=2),
                 nn.Dropout(0.25),
+                # Convolution 3 (new layer)
+                nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(512),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Dropout(0.25),
                 # Linear transformation
                 nn.Flatten(),
-                nn.Linear(256 * 16 * 16, 512),  # Adjust based on input size
+                nn.Linear(512 * 8 * 8, 512),  # Adjust based on the reduced spatial size
                 nn.ReLU(),
                 nn.Dropout(0.5),
                 nn.Linear(512, self.number_of_labels)

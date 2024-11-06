@@ -1,0 +1,23 @@
+/* styles.css */
+
+body {
+    background-color: #0f0f0f; /* Dark background */
+    color: #00ffcc; /* Neon teal text */
+    font-family: 'Orbitron', sans-serif; /* Futuristic font */
+}
+
+h1, h2, h3, h4 {
+    color: #ff00ff; /* Neon pink for headings */
+    text-shadow: 0 0 10px rgba(255, 0, 255, 0.8); /* Glowing effect */
+}
+
+a {
+    color: #00ffcc; /* Neon teal for links */
+    text-decoration: none;
+}
+
+a:hover {
+    color: #ff00ff; /* Neon pink on hover */
+    text-shadow: 0 0 15px rgba(255, 0, 255, 1); /* Glowing effect on hover */
+}
+

@@ -17,3 +17,6 @@ cancer_app/
 *.DS_Store
 *.pth
 *.pt
+
+# Ignore frontend library
+*/node_modules/

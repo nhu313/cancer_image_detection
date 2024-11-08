@@ -5,6 +5,10 @@ from tqdm import tqdm
 
 class CNN():
     def __init__(self, architecture: str = "wide", tensors: list = None, model_path: str = "cnn_model.pth"):
+        '''
+        tensors: list(image_tensors, label_tensors)
+        model_path: str
+        '''
         self.input_channels = 3
         self.number_of_labels = 4
         self.size = (64,64)
@@ -39,51 +43,54 @@ class CNN():
         """
         layers = []
         if architecture == "deep-wide":
-    # Wide and deep architecture
-            layers.extend([
-        # Convolution Block 1
-        nn.Conv2d(self.input_channels, 64, kernel_size=5, stride=1, padding=2),
-        nn.BatchNorm2d(64),
-        nn.ReLU(),
-        nn.MaxPool2d(kernel_size=2, stride=2),
-        nn.Dropout(0.3),
+           
 
-        # Convolution Block 2
-        nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-        nn.BatchNorm2d(128),
-        nn.ReLU(),
-        nn.MaxPool2d(kernel_size=2, stride=2),
-        nn.Dropout(0.3),
+            layers = [
+                # Convolution Block 1
+                nn.Conv2d(self.input_channels, 64, kernel_size=5, stride=1, padding=2),
+                nn.BatchNorm2d(64),
+                nn.LeakyReLU(negative_slope=0.01),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Dropout2d(0.2),  # Slightly lower dropout for initial layers
 
-        # Convolution Block 3
-        nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
-        nn.BatchNorm2d(256),
-        nn.ReLU(),
-        nn.MaxPool2d(kernel_size=2, stride=2),
-        nn.Dropout(0.4),
+                # Convolution Block 2
+                nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(128),
+                nn.LeakyReLU(negative_slope=0.01),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Dropout2d(0.3),
 
-        # Convolution Block 4
-        nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
-        nn.BatchNorm2d(512),
-        nn.ReLU(),
-        nn.MaxPool2d(kernel_size=2, stride=2),
-        nn.Dropout(0.4),
+                # Convolution Block 3
+                nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(256),
+                nn.LeakyReLU(negative_slope=0.01),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Dropout2d(0.4),
 
-        # Flatten and Fully Connected Layers
-        nn.Flatten(),
-        nn.Linear(512 * 4 * 4, 1024),  # Adjust based on image size
-        nn.ReLU(),
-        nn.Dropout(0.5),
-        nn.Linear(1024, 512),
-        nn.ReLU(),
-        nn.Dropout(0.5),
-        
-        # Final output layer
-        nn.Linear(512, self.number_of_labels),
-        nn.LogSoftmax(dim=1)  # LogSoftmax for multi-class classification
-    ])
+                # Convolution Block 4
+                nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(512),
+                nn.LeakyReLU(negative_slope=0.01),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Dropout2d(0.5),
 
-        return nn.Sequential(*layers)    
+                # Fully Connected Layers
+                nn.Flatten(),
+                nn.Linear(512 * 4 * 4, 1024),  # Adjusted for output of last pooling layer
+                nn.LeakyReLU(negative_slope=0.01),
+                nn.Dropout(0.5),
+
+                nn.Linear(1024, 512),
+                nn.LeakyReLU(negative_slope=0.01),
+                nn.Dropout(0.4),
+
+                # Output Layer
+                nn.Linear(512, self.number_of_labels)
+            ]
+
+        self.model = nn.Sequential(*layers)
+
+        return self.model
    
     def load_model(self, model_path):
         # Load model parameters

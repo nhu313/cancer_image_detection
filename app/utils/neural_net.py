@@ -60,7 +60,7 @@ class Convoultion_NN(ImageLoad):
             # TODO: Change for deployment
             img_array = row['Image'].copy()  
             img_tensor = torch.tensor(img_array, dtype=torch.float32) #/ 255.0  # Normalize to [0, 1]
-            img_tensor = F.normalize(img_tensor) 
+            #img_tensor = F.normalize(img_tensor) 
             img_tensor = img_tensor.permute(2, 0, 1)  # Convert (H, W, C) to (C, H, W)
             image_tensors.append(img_tensor)
 
@@ -89,7 +89,7 @@ class Convoultion_NN(ImageLoad):
                 nn.BatchNorm2d(64),
                 nn.LeakyReLU(negative_slope=0.01),
                 nn.MaxPool2d(kernel_size=2, stride=2),
-                nn.Dropout2d(0.2),  # initial layers have lower drop out
+                nn.Dropout2d(0.2),  # initial layers have lower drop
 
                 # Convolution Block 2
                 nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),

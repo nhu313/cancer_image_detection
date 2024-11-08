@@ -34,10 +34,5 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.5.2"
-  },
-  "engines" : {
-    "npm" : ">=9.8.1",
-    "node" : ">=v18.18.2"
   }
-
 }

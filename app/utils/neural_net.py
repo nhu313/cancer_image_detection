@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from load_images import ImageLoad  # Assuming ImageLoad is saved in load_images.py
 from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import DataLoader, TensorDataset
-
+from sklearn.model_selection import train_test_split
 
 class Convoultion_NN(ImageLoad):
     def __init__(self, dataset_path: str, learning_rate: float = 0.001, batch_size: int = 32, 
@@ -59,7 +59,7 @@ class Convoultion_NN(ImageLoad):
             # Fixes copying error on local machine
             # TODO: Change for deployment
             img_array = row['Image'].copy()  
-            img_tensor = torch.tensor(img_array, dtype=torch.float32) / 255.0  # Normalize to [0, 1]
+            img_tensor = torch.tensor(img_array, dtype=torch.float32) #/ 255.0  # Normalize to [0, 1]
             img_tensor = F.normalize(img_tensor) 
             img_tensor = img_tensor.permute(2, 0, 1)  # Convert (H, W, C) to (C, H, W)
             image_tensors.append(img_tensor)
@@ -82,50 +82,55 @@ class Convoultion_NN(ImageLoad):
 
         if architecture == "deep-wide":
             # Wide and deep architecture
-            layers.extend([
-        # Convolution Block 1
-        nn.Conv2d(self.input_channels, 64, kernel_size=5, stride=1, padding=2),
-        nn.BatchNorm2d(64),
-        nn.ReLU(),
-        nn.MaxPool2d(kernel_size=2, stride=2),
-        nn.Dropout(0.3),
 
-        # Convolution Block 2
-        nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-        nn.BatchNorm2d(128),
-        nn.ReLU(),
-        nn.MaxPool2d(kernel_size=2, stride=2),
-        nn.Dropout(0.3),
+            layers = [
+                # Convolution Block 1
+                nn.Conv2d(self.input_channels, 64, kernel_size=5, stride=1, padding=2), # larger kernel for feature extraction
+                nn.BatchNorm2d(64),
+                nn.LeakyReLU(negative_slope=0.01),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Dropout2d(0.2),  # initial layers have lower drop out
 
-        # Convolution Block 3
-        nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
-        nn.BatchNorm2d(256),
-        nn.ReLU(),
-        nn.MaxPool2d(kernel_size=2, stride=2),
-        nn.Dropout(0.4),
+                # Convolution Block 2
+                nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(128),
+                nn.LeakyReLU(negative_slope=0.01),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Dropout2d(0.3),
 
-        # Convolution Block 4
-        nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
-        nn.BatchNorm2d(512),
-        nn.ReLU(),
-        nn.MaxPool2d(kernel_size=2, stride=2),
-        nn.Dropout(0.4),
+                # Convolution Block 3
+                nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(256),
+                nn.LeakyReLU(negative_slope=0.01),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Dropout2d(0.4),
 
-        # Flatten and Fully Connected Layers
-        nn.Flatten(),
-        nn.Linear(512 * 4 * 4, 1024),  # Adjust based on image size
-        nn.ReLU(),
-        nn.Dropout(0.5),
-        nn.Linear(1024, 512),
-        nn.ReLU(),
-        nn.Dropout(0.5),
-        
-        # Final output layer
-        nn.Linear(512, self.number_of_labels),
-        nn.LogSoftmax(dim=1)  # LogSoftmax for multi-class classification
-    ])
+                # Convolution Block 4
+                nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(512),
+                nn.LeakyReLU(negative_slope=0.01),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Dropout2d(0.5),
 
-        return nn.Sequential(*layers)
+                # Fully Connected Layers
+                nn.Flatten(),
+                nn.Linear(512 * 4 * 4, 1024),  # Adjusted for output of last pooling layer
+                nn.LeakyReLU(negative_slope=0.01),
+                nn.Dropout(0.5),
+
+                nn.Linear(1024, 512),
+                nn.LeakyReLU(negative_slope=0.01),
+                nn.Dropout(0.4),
+
+                # Output Layer
+                nn.Linear(512, self.number_of_labels)
+            ]
+
+        # Wrap layers in Sequential
+        self.model = nn.Sequential(*layers)
+
+
+        return self.model
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -146,27 +151,84 @@ class Convoultion_NN(ImageLoad):
         Args:
             epochs (int): Number of training epochs.
         """
+        # Set the model to training mode
         self.model.train()
-        # TODO research
-        dataset = TensorDataset(self.image_tensors, self.label_tensors)
-        dataloader = DataLoader(dataset, batch_size=self.batch_size, shuffle=True)
 
+        # Convert the image_tensors and label_tensors to numpy arrays for splitting
+        images = self.image_tensors.numpy()  
+        labels = self.label_tensors.numpy()
+
+        # Perform train-test split (80% training, 20% testing)
+        train_images, test_images, train_labels, test_labels = train_test_split(images, labels, test_size=0.2, random_state=42)
+
+        # Convert back to torch tensors
+        train_images = torch.tensor(train_images)
+        test_images = torch.tensor(test_images)
+        train_labels = torch.tensor(train_labels)
+        test_labels = torch.tensor(test_labels)
+
+        # Create TensorDataset for train and test data
+        train_dataset = TensorDataset(train_images, train_labels)
+        test_dataset = TensorDataset(test_images, test_labels)
+
+        # Create DataLoader for train and test datasets
+        train_dataloader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True)
+        test_dataloader = DataLoader(test_dataset, batch_size=self.batch_size, shuffle=False)
+
+        # Iterate over epochs
         for epoch in range(epochs):
-            epoch_loss = 0
-            for img_tensors, label_tensors in tqdm(dataloader, total=len(dataloader)):
+            epoch_loss = 0.0
+            self.model.train()  # Ensure the model is in training mode
+
+            # Training loop
+            for img_tensors, label_tensors in tqdm(train_dataloader, total=len(train_dataloader)):
                 img_tensors, label_tensors = img_tensors.to(self.device), label_tensors.to(self.device)
+                
                 # Forward pass
-                output = self.model(img_tensors)  
+                output = self.model(img_tensors)
                 loss = self.loss_function(output, label_tensors)
+                
                 # Zero gradients
                 self.optimizer.zero_grad()
-                # Backpropagation  
-                loss.backward()  
+                
+                # Backpropagation
+                loss.backward()
+                
                 # Update weights
-                self.optimizer.step()  
-                # loss
-                epoch_loss += loss.item() 
-            print(f"Epoch [{epoch + 1}/{epochs}], Loss: {epoch_loss / len(dataloader):.4f}")
+                self.optimizer.step()
+                
+                # Accumulate loss
+                epoch_loss += loss.item()
+
+            # Calculate average loss for the epoch
+            avg_epoch_loss = epoch_loss / len(train_dataloader)
+            print(f"Epoch [{epoch + 1}/{epochs}], Loss: {avg_epoch_loss:.4f}")
+            torch.save(self.model.state_dict(), f"model_epoch_{epoch + 1}.pth")
+            
+        self.model.eval()  # Set the model to evaluation mode
+        total_correct = 0
+        total_samples = 0
+        
+        with torch.no_grad():  # No gradients needed for evaluation
+            for img_tensors, label_tensors in test_dataloader:
+                img_tensors, label_tensors = img_tensors.to(self.device), label_tensors.to(self.device)
+                
+                # Forward pass
+                output = self.model(img_tensors)
+                
+                # Get predictions (e.g., using argmax for classification)
+                _, predicted = torch.max(output, 1)
+                
+                # Track the number of correct predictions
+                total_samples += label_tensors.size(0)
+                total_correct += (predicted == label_tensors).sum().item()
+
+        # Calculate test accuracy after each epoch
+        accuracy = 100 * total_correct / total_samples
+        print(f"Test Accuracy after Epoch {epoch + 1}: {accuracy:.2f}%")
+        
+        # Optionally save model checkpoints after each epoch (if needed)
+        # torch.save(self.model.state_dict(), f"model_epoch_{epoch + 1}.pth")
 
     def process_image(self, file_path: str) -> str:
         """
@@ -208,8 +270,8 @@ class Convoultion_NN(ImageLoad):
             image = numpy_array
 
         image = image.copy()
-        img_tensor = torch.tensor(image, dtype=torch.float32) / 255.0  # Normalize to [0, 1]
-        img_tensor = F.normalize(img_tensor)  # Further normalization (optional)
+        img_tensor = torch.tensor(image, dtype=torch.float32) #/ 255.0  # Normalize to [0, 1]
+        #img_tensor = F.normalize(img_tensor)  # Further normalization (optional)
 
         img_tensor = img_tensor.permute(2, 0, 1)  # (H, W, C) -> (C, H, W)
         return img_tensor.to(self.device)  # Return tensor on correct device

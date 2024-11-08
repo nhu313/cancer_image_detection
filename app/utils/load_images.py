@@ -21,7 +21,7 @@ class ImageLoad:
         self.dataset_path = dataset_path
         self.image_np_arrays = list() # populated in main_loop
         self.output_dir = 'data/output'
-        self.percent = 0.30
+        self.percent = 0.70
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Load image paths
@@ -74,7 +74,7 @@ class ImageLoad:
         self.df = pd.DataFrame(processed_images_list, columns=['Label', 'Image'])
         
         # Find the minimum row count across all categories
-        min_count = self.df['Label'].value_counts().min()
+        min_count = self.df['Label'].value_counts().min() - 500
 
         # Sample each category to have the same number of rows as `min_count`
         self.df = self.df.groupby('Label').apply(lambda x: x.sample(n=min_count)).reset_index(drop=True)

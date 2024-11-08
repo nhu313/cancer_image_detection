@@ -1,10 +1,9 @@
 import torch
 import torch.nn as nn
-from load_images import ImageLoad
 import torch.nn.functional as F
 from tqdm import tqdm
 
-class CNN(ImageLoad):
+class CNN():
     def __init__(self, architecture: str = "wide", tensors: list = None, model_path: str = "cnn_model.pth"):
         self.input_channels = 3
         self.number_of_labels = 4

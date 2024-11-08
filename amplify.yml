@@ -13,7 +13,7 @@ frontend:
         - ng version
         - ng build --configuration=production
   artifacts:
-    baseDirectory: dist/amplify-angular-template/browser
+    baseDirectory: dist/cancer-detection/angular/browser
     files:
       - '**/*'
   cache:

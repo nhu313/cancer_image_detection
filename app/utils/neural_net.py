@@ -85,45 +85,44 @@ class Convoultion_NN(ImageLoad):
 
             layers = [
                 # Convolution Block 1
-                nn.Conv2d(self.input_channels, 64, kernel_size=5, stride=1, padding=2), # larger kernel for feature extraction
-                nn.BatchNorm2d(64),
+                nn.Conv2d(self.input_channels, 32, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(32),
                 nn.LeakyReLU(negative_slope=0.01),
                 nn.MaxPool2d(kernel_size=2, stride=2),
-                nn.Dropout2d(0.2),  # initial layers have lower drop
+                nn.Dropout2d(0.2),
 
                 # Convolution Block 2
-                nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-                nn.BatchNorm2d(128),
+                nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(64),
                 nn.LeakyReLU(negative_slope=0.01),
                 nn.MaxPool2d(kernel_size=2, stride=2),
                 nn.Dropout2d(0.3),
 
                 # Convolution Block 3
-                nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
-                nn.BatchNorm2d(256),
+                nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(128),
                 nn.LeakyReLU(negative_slope=0.01),
                 nn.MaxPool2d(kernel_size=2, stride=2),
                 nn.Dropout2d(0.4),
 
                 # Convolution Block 4
-                nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
-                nn.BatchNorm2d(512),
+                nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(256),
                 nn.LeakyReLU(negative_slope=0.01),
                 nn.MaxPool2d(kernel_size=2, stride=2),
                 nn.Dropout2d(0.5),
 
+                # Global Average Pooling
+                nn.AdaptiveAvgPool2d(1),  # Output will be 256 x 1 x 1
+
                 # Fully Connected Layers
                 nn.Flatten(),
-                nn.Linear(512 * 4 * 4, 1024),  # Adjusted for output of last pooling layer
-                nn.LeakyReLU(negative_slope=0.01),
-                nn.Dropout(0.5),
-
-                nn.Linear(1024, 512),
+                nn.Linear(256, 128),
                 nn.LeakyReLU(negative_slope=0.01),
                 nn.Dropout(0.4),
 
                 # Output Layer
-                nn.Linear(512, self.number_of_labels)
+                nn.Linear(128, self.number_of_labels)
             ]
 
         # Wrap layers in Sequential
@@ -269,7 +268,7 @@ class Convoultion_NN(ImageLoad):
         else:
             image = numpy_array
 
-        image = image.copy()
+        #image = image.copy()
         img_tensor = torch.tensor(image, dtype=torch.float32) #/ 255.0  # Normalize to [0, 1]
         #img_tensor = F.normalize(img_tensor)  # Further normalization (optional)
 

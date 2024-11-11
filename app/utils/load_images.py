@@ -21,7 +21,7 @@ class ImageLoad:
         self.dataset_path = dataset_path
         self.image_np_arrays = list() # populated in main_loop
         self.output_dir = 'data/output'
-        self.percent = 0.00
+        self.percent = 0.70
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Load image paths

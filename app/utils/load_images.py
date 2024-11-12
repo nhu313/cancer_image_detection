@@ -8,7 +8,7 @@ import pandas as pd
 
 
 class ImageLoad:
-    def __init__(self, dataset_path: str, save_new_dataset: bool = 0, resize_to=(64, 64)):
+    def __init__(self, dataset_path: str, save_new_dataset: bool = 0, resize_to=(128, 128)):
         """
         Initializes the ImageLoad class.
 
@@ -21,7 +21,7 @@ class ImageLoad:
         self.dataset_path = dataset_path
         self.image_np_arrays = list() # populated in main_loop
         self.output_dir = 'data/output'
-        self.percent = 0.70
+        self.percent = 0.80
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Load image paths
@@ -101,7 +101,7 @@ class ImageLoad:
         #     return self._add_gaussian_noise(img_resized)
         return img_resized
 
-    def _add_gaussian_noise(self, image: np.ndarray, cat:bool=True, mean: float = 0, sigma: float = 25) -> np.ndarray:
+    def _add_gaussian_noise(self, image: np.ndarray, cat:bool=True, mean: float = 0, sigma: float = 5) -> np.ndarray:
         """Adds Gaussian noise to the image."""
         if random.randint(0, 1) > self.percent or cat == True:
 
@@ -156,7 +156,7 @@ class ImageLoad:
     def _add_gaussian_blurr(self, image: np.ndarray, cat:bool = False) -> np.ndarray:
         """Applies Gaussian blur to the image."""
         if random.randint(0, 1) > self.percent or cat == False:
-            return cv2.GaussianBlur(image, (3, 3), 0)
+            return cv2.GaussianBlur(image, (5, 5), 0)
         return None
     
     def _load_image_paths(self) -> list[tuple[str, str, str]]:

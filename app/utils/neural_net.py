@@ -73,7 +73,7 @@ class Convoultion_NN(ImageLoad):
         Builds the CNN model based on the specified architecture.
 
         Args:
-            architecture (str): Architecture type ("wide").
+            architecture (str): Architecture type ("deep-wide").
 
         Returns:
             nn.Sequential: A sequential model based on the desired architecture.
@@ -85,27 +85,20 @@ class Convoultion_NN(ImageLoad):
 
             layers = [
                 # Convolution Block 1
-                nn.Conv2d(self.input_channels, 32, kernel_size=3, stride=1, padding=1),
-                nn.BatchNorm2d(32),
+                nn.Conv2d(self.input_channels, 128, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(128),
                 nn.LeakyReLU(negative_slope=0.01),
                 nn.MaxPool2d(kernel_size=2, stride=2),
                 nn.Dropout2d(0.2),
 
                 # Convolution Block 2
-                nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
-                nn.BatchNorm2d(64),
+                nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(128),  # Corrected to 128 to match Conv2d output channels
                 nn.LeakyReLU(negative_slope=0.01),
                 nn.MaxPool2d(kernel_size=2, stride=2),
                 nn.Dropout2d(0.3),
 
                 # Convolution Block 3
-                nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-                nn.BatchNorm2d(128),
-                nn.LeakyReLU(negative_slope=0.01),
-                nn.MaxPool2d(kernel_size=2, stride=2),
-                nn.Dropout2d(0.4),
-
-                # Convolution Block 4
                 nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
                 nn.BatchNorm2d(256),
                 nn.LeakyReLU(negative_slope=0.01),
@@ -124,10 +117,11 @@ class Convoultion_NN(ImageLoad):
                 # Output Layer
                 nn.Linear(128, self.number_of_labels)
             ]
+        else:
+            raise ValueError(f"Unsupported architecture type '{architecture}'")
 
         # Wrap layers in Sequential
         self.model = nn.Sequential(*layers)
-
 
         return self.model
 

@@ -8,7 +8,7 @@ import pandas as pd
 
 
 class ImageLoad:
-    def __init__(self, dataset_path: str, save_new_dataset: bool = 0, resize_to=(64, 64)):
+    def __init__(self, dataset_path: str, save_new_dataset: bool = 0, resize_to=(128, 128)):
         """
         Initializes the ImageLoad class.
 
@@ -21,7 +21,7 @@ class ImageLoad:
         self.dataset_path = dataset_path
         self.image_np_arrays = list() # populated in main_loop
         self.output_dir = 'data/output'
-        self.percent = 0.70
+        self.percent = 0.80
         os.makedirs(self.output_dir, exist_ok=True)
 
         # Load image paths

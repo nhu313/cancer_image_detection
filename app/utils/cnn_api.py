@@ -17,15 +17,15 @@ class CNN():
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = self.build_model(architecture).to(self.device)
         self.batch_size = 32
-        
+
         if tensors and len(tensors) == 2:
-            
+
             self.load_model(model_path=model_path)
             self.image_tensors,self.label_tensors = self.load_tensors(tensors)
             print('CNN INIT SUCCESSFUL: 200')
         else:
             raise ValueError("Tensors must be provided as a list of two file paths.")
-        
+
     def load_tensors(self, tensors):
         # Load saved tensors
         self.image_tensors = torch.load(tensors[0],weights_only=True).to(self.device)
@@ -95,7 +95,7 @@ class CNN():
         self.model.load_state_dict(torch.load(model_path, weights_only=True, map_location=self.device))
         self.model.eval()
         print("Model loaded from disk.")
-    
+
     def _open_image(self, path_to_image:str):
         '''
         Return a resized NumpyArray of (128,128)
@@ -112,8 +112,8 @@ class CNN():
         image_resized = Image.fromarray(img_cropped).resize(size)
         # Convert resized image back to a NumPy array
         img_resized = np.array(image_resized)
-        return img_resized  
-     
+        return img_resized
+
     def predict_image(self, path_to_image) -> int:
         # Predict class for a single image tensor
         self.model.eval()
@@ -139,7 +139,7 @@ class CNN():
             torch.Tensor: Output predictions.
         """
         return self.model(x)
-    
+
     def process_image(self, file_path: str) -> str:
         """
         Processes and predicts the label for a single image using the trained model.
@@ -151,18 +151,18 @@ class CNN():
             str: Predicted label.
         """
         self.model.eval()  # Set the model to evaluation mode
-        
+
         with torch.no_grad():  # Disable gradient calculation for inference
             img_tensor = self.image_to_tensor(file_path)  # Convert image to tensor
             output = self.model(img_tensor.unsqueeze(0))  # Forward pass (add batch dimension)
-            
+
             # Get the predicted label by finding the index of the max log-probability
             predicted_label_index = torch.argmax(output.data, dim=1).item()
             predicted_label = self.label_encoder.inverse_transform([predicted_label_index])[0]  # Convert back to label
-            
+
             print("Model output:", output)  # Print the raw output for debugging
             return predicted_label
-        
+
     def image_to_tensor(self, file_path: str = None, numpy_array: np.ndarray = None) -> torch.Tensor:
         """
         Turn numpy array or file_path into Tensor with normalized pixel values.
@@ -196,7 +196,7 @@ class CNN():
 # Example usage
 if __name__ == "__main__":
     tensor_paths = ["app/utils/data/image_tensors.pt", "app/utils/data/label_tensors.pt"]
-    cnn = CNN(tensors=tensor_paths, model_path='app/utils/data/model_11_4.pth')
+    cnn = CNN(tensors=tensor_paths, model_path='app/utils/data/model_11_15_dw.pth')
 
     # Predict on a sample tensor from loaded image tensors
 

@@ -7,7 +7,7 @@ app = Flask(__name__)
 # Initialize the CNN model
 cnn = CNN(architecture='deep-wide',
            tensors=["app/utils/data/image_tensors.pt", "app/utils/data/label_tensors.pt"],
-           model_path='app/utils/data/model_11_4.pth')
+           model_path='app/utils/data/model_11_15_dw.pth')
 
 @app.route('/api/process_image', methods=['POST'])
 def upload_image():

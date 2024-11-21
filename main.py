@@ -5,7 +5,7 @@ from app.utils.cnn_api import CNN
 app = Flask(__name__)
 
 # Initialize the CNN model
-cnn = CNN(architecture='wide',
+cnn = CNN(architecture='deep-wide',
            tensors=["app/utils/data/image_tensors.pt", "app/utils/data/label_tensors.pt"],
            model_path='app/utils/data/model_11_4.pth')
 

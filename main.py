@@ -28,7 +28,7 @@ def upload_image():
     file.save(file_path)
 
     category = cnn.predict_image(file_path)
-    return jsonify({'category': category, 'file_path': file_path})
+    return jsonify({'category': category, 'file_path': file_path, 'file_name': file.filename})
 
 @app.route('/')
 def home():

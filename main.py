@@ -1,8 +1,16 @@
 # app.py (or main.py if that's what you're using)
 from flask import Flask, request, jsonify
 from app.utils.cnn_api import CNN
+import os
+from flask_cors import CORS
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+app.config['UPLOAD'] = UPLOAD_FOLDER
 
 # Initialize the CNN model
 cnn = CNN(architecture='deep-wide',
@@ -12,10 +20,15 @@ cnn = CNN(architecture='deep-wide',
 @app.route('/api/process_image', methods=['POST'])
 def upload_image():
     file = request.files.get('file')
+
     if not file:
         return jsonify({'error': 'No file uploaded'}), 400
-    category = cnn.predict_image_tensor(file)
-    return jsonify({'category': category})
+
+    file_path = os.path.join(app.config['UPLOAD'], file.filename)
+    file.save(file_path)
+
+    category = cnn.predict_image(file_path)
+    return jsonify({'category': category, 'file_path': file_path, 'file_name': file.filename})
 
 @app.route('/')
 def home():
